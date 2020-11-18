@@ -1,74 +1,76 @@
 /// <reference types="cypress" />
 
+
+Cypress.Commands.add('CheckWF',{prevSuject:false},()=>{
+    // wave function test
+    // analytical solution option
+    cy.get("#var_isShowAnalyticSolution").then($tick => {
+        if ($tick.is(':visible')){
+            cy.log($tick.is(':checked'))
+            if(!$tick.is(':checked')){
+                cy.get('#var_isShowAnalyticSolution').check()
+                cy.get('#aDIV10full > .hdivtitle > .Text-hr4').click()
+            }
+        }
+    })
+    // wave function test
+    cy.get('#Eigenvalues').children().each($option=>{
+        cy.get('#Eigenvalues').select($option.val()).should('have.value', $option.val())
+    });
+    // cy.get('#submitdataWF').click()
+
+    //averaged values test
+    cy.get('#avaltype').children().each($option=>{
+        cy.get('#avaltype').select($option.val()).should('have.value', $option.val())
+    });
+    // cy.get('#submitdata2saveO').click() 
+
+})
+
+
+
 context('"Cours de la mechanique quantique" tests at Supelec', () => {
 
     let url = 'http://prd-mecaqu.centralesupelec.fr/EN/'
-    for(let profile=0;profile<30;profile++){
-        it('exo1 profile='+`${profile}`+' test', () => {
-            cy.visit(url+'ex1.html')
+    for(let exo=1;exo<=1;exo++){
+        it('exo'+`${exo}`+' test', () => {
+            cy.viewport(1200,1000);
+            cy.visit(url+'ex'+`${exo}`+'.html')
+
+            cy.get('#aDIV2full > .hdivtitle > .Text-hr4').click()
+            cy.get('#aDIV3full > .hdivtitle > .Text-hr4').click()
 
             //check profiles
             // choose profile
-            // cy.get('#var_Pot_Type').select("0")
-            // cy.get('#var_Pot_Type').should('have.value', '0')
-            cy.get('#var_Pot_Type').then($body => {
-                if ($body.find("option[value="+`${profile}`+"]").length > 0 ) {   //evaluates as true
-                    cy.get('#var_Pot_Type').select(`${profile}`)
-                    cy.get('#var_Pot_Type').should('have.value',`${profile}`)
+            cy.get('#var_Pot_Type').children().each($option=>{
+                cy.log($option.text())
+                cy.get('#var_Pot_Type').select($option.val()).should('have.value', $option.val())//.wait(10000)
+                // cy.wait('[&myAppState=true]', {timeout: 10000})
 
-                    cy.get('#aDIV2full > .hdivtitle > .Text-hr4').click()
-                    cy.get('#aDIV3full > .hdivtitle > .Text-hr4').click()
-
-                    // change discretization
-                    for(let i=0;i<4;i++){
-                        cy.get('#var_Type').then($body => {
-                            if ($body.find("option[value="+`${i}`+"]").length > 0 ) {   //evaluates as true
-                                cy.get('#var_Type').select(`${i}`)
-                                cy.get('#var_Type').should('have.value',`${i}`)
-                            }
-                        });
-                    }
+                // change discretization
+                cy.get('#var_Type').children().each($option=>{
+                    cy.get('#var_Type').select($option.val()).should('have.value', $option.val())//.wait(3000)
+    
 
                     cy.get('#var_isEnergies').uncheck()
                     cy.get('#var_isEnergies').check()
                     cy.get('#var_isProbability').uncheck()
                     cy.get('#var_isProbability').check()
 
-                    // wave function test
-                    // analytical solution option
-                    cy.get("#var_isShowAnalyticSolution").then($tick => {
-                        if ($tick.is(':visible')){
-                            cy.get('#var_isShowAnalyticSolution').check()
-                        }
-                    })
-                    // wave function test
-                    for(let i=0;i<10;i++){
-                        cy.get('#Eigenvalues').then($body => {
-                            if ($body.find("option[value="+`${i}`+"]").length > 0 ) {   //evaluates as true
-                                cy.get('#Eigenvalues').select(`${i}`)
-                                cy.get('#Eigenvalues').should('have.value',`${i}`)
-                            }
-                        });
-                    }
-                    // cy.get('#submitdataWF').click()
-
-                    //averaged values test
-                    for(let i=0;i<10;i++){
-                        cy.get('#avaltype').then($body => {
-                            if ($body.find("option[value="+`${i}`+"]").length > 0 ) {   //evaluates as true
-                                cy.get('#avaltype').select(`${i}`)
-                                cy.get('#avaltype').should('have.value',`${i}`)
-                            }
-                        });
-                    }
-                    // cy.get('#submitdata2saveO').click() 
-
+                    // wave function and averaged values tests
+                    cy.CheckWF()
                     // check eigenvalues
                     cy.get('#var_Neig').click().focused().clear().type('1')
                     cy.get('#submitdata2').click()
+                    cy.CheckWF()
+                    cy.get('#var_Neig').click().focused().clear().type('10')
 
-                }
+
+
+                });
             });
+
+
         })
     }
 })
